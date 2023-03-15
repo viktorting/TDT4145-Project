@@ -3,18 +3,20 @@ import sqlite3
 # Dokumentasjon:
 # https://docs.python.org/3/library/sqlite3.html
 
+print('Connecting to database...')
 database = sqlite3.connect('TogDB.db')
 
 
 cursor = database.cursor()
 
-var = input()
-cursor.execute("SELECT * FROM table WHERE attribute = ?", (var))
+# var = input()
+# cursor.execute("SELECT * FROM table WHERE attribute = ?", (var))
 
 # cursor.fetchone()
 # cursor.fetchall()
 # cursor.fetchmany(n)
 
+print('Closing database...')
 database.close()
 
 # cursor.execute('''CREATE TABLE person
