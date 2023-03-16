@@ -44,9 +44,9 @@ INSERT INTO Operatør VALUES (1, "SJ");
 
 
  -- Togrute(RuteID, Retning, OperatørID)
-INSERT INTO Togrute VALUES (1, "Nord", "SJ");
-INSERT INTO Togrute VALUES (2, "Nord", "SJ");
-INSERT INTO Togrute VALUES (3, "Sør", "SJ");
+INSERT INTO Togrute VALUES (1, "Nord", 1);
+INSERT INTO Togrute VALUES (2, "Nord", 1);
+INSERT INTO Togrute VALUES (3, "Sør", 1);
 
 
  -- Togruteforekomst(ForekomstID, RuteID, Dato)
