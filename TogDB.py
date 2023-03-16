@@ -1,6 +1,6 @@
 import sqlite3
 
-# Dokumentasjon:
+# SQLite3 Dokumentasjon:
 # https://docs.python.org/3/library/sqlite3.html
 
 print('Connecting to database...')
@@ -18,10 +18,8 @@ cursor = database.cursor()
 
 while(var := input('Input: ')):
 
-    if(var.lower() == 'stop'):
-        break
-
-    else: print(var)
+    # an empty input will quit the while loop
+    print(f'Loop running... Your input: {var}')
 
 
 print('Closing database...')
