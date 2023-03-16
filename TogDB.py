@@ -6,7 +6,6 @@ import sqlite3
 print('Connecting to database...')
 database = sqlite3.connect('TogDB.db')
 
-
 cursor = database.cursor()
 
 # var = input()
@@ -15,6 +14,15 @@ cursor = database.cursor()
 # cursor.fetchone()
 # cursor.fetchall()
 # cursor.fetchmany(n)
+
+
+while(var := input('Input: ')):
+
+    if(var.lower() == 'stop'):
+        break
+
+    else: print(var)
+
 
 print('Closing database...')
 database.close()
