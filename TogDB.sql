@@ -87,6 +87,28 @@ INSERT INTO StasjonITabell VALUES (3, "Steinkjer", "12:31");
 INSERT INTO StasjonITabell VALUES (3, "Trondheim", "14:13");
 
 
+ -- TogruteKjørerDag(RuteID, Dag)
+INSERT INTO TogruteKjørerDag VALUES (1, "Mandag");
+INSERT INTO TogruteKjørerDag VALUES (1, "Tirsdag");
+INSERT INTO TogruteKjørerDag VALUES (1, "Onsdag");
+INSERT INTO TogruteKjørerDag VALUES (1, "Torsdag");
+INSERT INTO TogruteKjørerDag VALUES (1, "Fredag");
+
+INSERT INTO TogruteKjørerDag VALUES (2, "Mandag");
+INSERT INTO TogruteKjørerDag VALUES (2, "Tirsdag");
+INSERT INTO TogruteKjørerDag VALUES (2, "Onsdag");
+INSERT INTO TogruteKjørerDag VALUES (2, "Torsdag");
+INSERT INTO TogruteKjørerDag VALUES (2, "Fredag");
+INSERT INTO TogruteKjørerDag VALUES (2, "Lørdag");
+INSERT INTO TogruteKjørerDag VALUES (2, "Søndag");
+
+INSERT INTO TogruteKjørerDag VALUES (3, "Mandag");
+INSERT INTO TogruteKjørerDag VALUES (3, "Tirsdag");
+INSERT INTO TogruteKjørerDag VALUES (3, "Onsdag");
+INSERT INTO TogruteKjørerDag VALUES (3, "Torsdag");
+INSERT INTO TogruteKjørerDag VALUES (3, "Fredag");
+
+
  -- Ukedag(Dag)
 INSERT INTO Ukedag VALUES ("Mandag");
 INSERT INTO Ukedag VALUES ("Tirsdag");

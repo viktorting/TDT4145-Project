@@ -8,50 +8,74 @@ database = sqlite3.connect('TogDB.db')
 
 cursor = database.cursor()
 
-# var = input()
-# cursor.execute("SELECT * FROM table WHERE attribute = ?", (var))
+"""
+c) For en stasjon som oppgis, skal bruker få ut alle togruter som er innom stasjonen en gitt ukedag.
+"""
+# Param: station (string), day (string)
+def get_all_routes(station, day):
+    cursor.execute(f"""
+        SELECT TogruteTabell.RuteID
+        FROM TogruteKjørerDag
+            NATURAL JOIN TogruteTabell
+            NATURAL JOIN StasjonITabell
+        WHERE TogruteKjørerDag.Dag = '{day}' AND StasjonITabell.Stasjonsnavn = '{station}'
+    """)
+    
+    return cursor.fetchall()
 
-# cursor.fetchone()
-# cursor.fetchall()
-# cursor.fetchmany(n)
+
+"""
+d) Bruker skal kunne søke etter togruter som går mellom en startstasjon og en sluttstasjon, 
+med utgangspunkt i en dato og et klokkeslett. 
+Alle ruter den samme dagen og den neste skal returneres, sortert på tid.
+"""
+# Param: station (string), day (string)
+def get_all_routes_between(start, end, day):
+    cursor.execute(f"""
+        SELECT TogruteTabell.RuteID
+        FROM TogruteKjørerDag
+            NATURAL JOIN TogruteTabell
+            NATURAL JOIN StasjonITabell
+        WHERE 
+            TogruteKjørerDag.Dag = '{day}'
+            AND EXISTS (
+                SELECT StasjonITabell.Stasjonsnavn
+                FROM StasjonITabell
+                WHERE StasjonITabell.Stasjonsnavn = '{start}' AND StasjonITabell.Stasjonsnavn = '{end}'
+            )
+        ORDER BY StasjonITabell.Tid
+    """)
+    
+    return cursor.fetchall()
+
+"""
+e) En bruker skal kunne registrere seg i kunderegisteret
+"""
+
+"""
+g) Registrerte kunder skal kunne finne ledige billetter for en oppgitt strekning på en ønsket togrute
+og kjøpe de billettene hen ønsker. (Husk å kun slege ledige plasser)
+"""
+
+# h) For en bruker skal man kunne finne all informasjon om de kjøpene hen har gjort for fremtidige reiser
 
 
-while(var := input('Input: ')):
+# an empty input will quit the while loop
+while(action := input('''Actions: 
+    Fetch - Get all routes stopping at a chosen station on said day. Format example: Trondheim Mandag   
+    Between - 
 
-    # an empty input will quit the while loop
-    print(f'Loop running... Your input: {var}')
+    Press 'Enter' to quit...
+    
+    Select action: ''')):
+
+    if (action == 'Fetch'):
+        tmp = input('Station + Day (Seperate by space): ').split(' ')
+        print(get_all_routes(tmp[0], tmp[1]))
+    if (action == "Between"):
+        tmp = input('Start Station + End Station + Day: ').split(' ')
+        print(get_all_routes_between(tmp[0], tmp[1], tmp[2]))
 
 
 print('Closing database...')
 database.close()
-
-""" 
-cursor.execute('''CREATE TABLE person
-(id INTEGER PRIMARY KEY, name TEXT, birthday TEXT)''')
-cursor.execute('''INSERT INTO person VALUES (1, 'Ola Nordmann', '2002-02-02')''')
-database.commit()
-databse.close()
-"""
-
-""" 
-Oppgaver:
-
-c) For en stasjon som oppgis, skal bruker få ut alle togruter som er innom stasjonen en gitt ukedag. 
-
-
-d) Bruker skal kunne søke etter togruter som går mellom en startstasjon og en sluttstasjon, med
-utgangspunkt i en dato og et klokkeslett. Alle ruter den samme dagen og den neste skal
-returneres, sortert på tid.
-
-
-e) En bruker skal kunne registrere seg i kunderegisteret
-
-
-g) Registrerte kunder skal kunne finne ledige billetter for en oppgitt strekning på en ønsket togrute
-og kjøpe de billettene hen ønsker. (Husk å kun slege ledige plasser)
-
-
-h) For en bruker skal man kunne finne all informasjon om de kjøpene hen har gjort for fremtidige
-reiser
-
-"""
