@@ -25,12 +25,13 @@ while(var := input('Input: ')):
 print('Closing database...')
 database.close()
 
-# cursor.execute('''CREATE TABLE person
-# (id INTEGER PRIMARY KEY, name TEXT, birthday TEXT)''')
-# cursor.execute('''INSERT INTO person VALUES (1, 'Ola Nordmann', '2002-02-02')''')
-# database.commit()
-# databse.close()
-
+""" 
+cursor.execute('''CREATE TABLE person
+(id INTEGER PRIMARY KEY, name TEXT, birthday TEXT)''')
+cursor.execute('''INSERT INTO person VALUES (1, 'Ola Nordmann', '2002-02-02')''')
+database.commit()
+databse.close()
+"""
 
 """ 
 Oppgaver:
