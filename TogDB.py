@@ -32,31 +32,21 @@ Alle ruter den samme dagen og den neste skal returneres, sortert på tid.
 # Param: station (string), day (string)
 def get_all_routes_between(start, end, day):
     cursor.execute(f"""
-        SELECT TogRuteTabell.RuteID, StasjonITabell.Stasjonsnavn, TogruteKjørerDag.Dag, StasjonITabell.Tid
+        SELECT  *
         FROM TogRuteTabell
-	        NATURAL JOIN StasjonITabell
+	        NATURAL JOIN StasjonITabell as Start
+	        CROSS JOIN StasjonITabell as EndStation
 	        NATURAL JOIN TogruteKjørerDag
-        WHERE 
-	        Dag = {day} AND
-	        (Stasjonsnavn = {start} OR Stasjonsnavn = {end})
-        ORDER BY Tid
+	
+        WHERE Dag = "Mandag"
+	        AND (Start.Stasjonsnavn = "Steinkjer" AND EndStation.Stasjonsnavn ="Mosjøen")
+	        AND (Start.TabellID = EndStation.TabellID)
+	        AND (Start.Tid < EndStation.Tid) -- Fungerer ikke når toget går før midatt over natten
+
+        ORDER BY Start.Tid
     """)
     
     return cursor.fetchall()
-
-
-""" Funker i SQL men IKKE Python, møkk.
-SELECT TogRuteTabell.RuteID, StasjonITabell.Stasjonsnavn, TogruteKjørerDag.Dag, StasjonITabell.Tid
-FROM TogRuteTabell
-	NATURAL JOIN StasjonITabell
-	NATURAL JOIN TogruteKjørerDag
-WHERE 
-	Dag = "Mandag" AND
-	(Stasjonsnavn = "Trondheim" OR Stasjonsnavn = "Bodø")
-	
-ORDER BY Tid
- """
-
 
 
 """
