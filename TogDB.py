@@ -63,19 +63,20 @@ og kjøpe de billettene hen ønsker. (Husk å kun slege ledige plasser)
 
 # an empty input will quit the while loop
 while(action := input('''Actions: 
-    Fetch - Get all routes stopping at a chosen station on said day. Format example: Trondheim Mandag   
-    Between - 
+    Fetch - Get all routes stopping at a chosen station on said day.   
+    Between - Get all routes running between two chosen station on a said day.
 
     Press 'Enter' to quit...
     
     Select action: ''')):
 
-    if (action == 'Fetch'):
-        tmp = input('Station + Day (Seperate by space): ').split(' ')
-        print(get_all_routes(tmp[0], tmp[1]))
+    if (action == 'Fetch'):  # fix return formatting
+        print(get_all_routes(input('Station: '), 
+                            input('Day: ')))
     if (action == "Between"):
-        tmp = input('Start Station + End Station + Day: ').split(' ')
-        print(get_all_routes_between(tmp[0], tmp[1], tmp[2]))
+        print(get_all_routes_between(input('Start Station: '), 
+                                     input('End Station: '), 
+                                     input('Day: ')))
 
 
 print('Closing database...')
