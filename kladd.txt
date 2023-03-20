@@ -1,0 +1,44 @@
+-- Henter alle ledige plasser for en TogRuteForeKomst:
+
+SELECT ForekomstID, Dato, SitteplassID
+FROM TogRuteForekomst
+	NATURAL JOIN SattSammenAv
+	NATURAL JOIN Sitteplass
+WHERE ForekomstID = 1
+	AND ForekomstID = OppsettID
+
+EXCEPT
+
+SELECT ForekomstID, Dato, SitteplassID
+FROM TogRuteForekomst
+	NATURAL JOIN Vognoppsett
+	NATURAL JOIN SattSammenAv
+	NATURAL JOIN Vogn
+	NATURAL JOIN Sitteplass
+	NATURAL JOIN SitteplassPåBillett
+	NATURAL JOIN Billett
+WHERE ForekomstID = 1
+	AND RuteID = 1
+    AND EXISTS (SELECT SitteplassID 
+		FROM SitteplassPåBillett
+		WHERE SitteplassPåBillett.SitteplassID = Sitteplass.SitteplassID
+	)
+
+-- Henter alle tatte plasser mellom to stasjoner på en TogRuteForeKomst:
+
+SELECT Dato, RuteID, VognType, SitteplassID, BillettID, StartStasjon, EndeStasjon
+FROM TogRuteForekomst
+	NATURAL JOIN Vognoppsett
+	NATURAL JOIN SattSammenAv
+	NATURAL JOIN Vogn
+	NATURAL JOIN Sitteplass
+	NATURAL JOIN SitteplassPåBillett
+	NATURAL JOIN Billett
+WHERE ForekomstID = 1
+	AND RuteID = 1
+	AND StartStasjon = "Trondheim"
+	AND EndeStasjon = "Mosjøen"
+    AND EXISTS (SELECT SitteplassID 
+		FROM SitteplassPåBillett 
+		WHERE SitteplassPåBillett.SitteplassID = Sitteplass.SitteplassID
+	)
