@@ -133,7 +133,7 @@ def get_all_availble_seats_between_stations(start, end, route):
 	        NATURAL JOIN Sitteplass
         WHERE ForekomstID = {route}
 	        AND ForekomstID = OppsettID
-        ''')
+    ''')
     
     # format return to str list to compare with taken seats:
     available_seats = str(cursor.fetchall()).replace('(', '').replace(',)', '').replace('[', '').replace(']', '').split(', ')
@@ -233,51 +233,3 @@ while(action := input('''Actions:
 print('Closing database...')
 database.close()
 
-
-
-
-
-
-
-'''
-SELECT *
-FROM StasjonITabell NATURAL JOIN TogRuteTabell
-WHERE RuteID = 1
-	AND Stasjonsnavn <> (SELECT Stasjonsnavn
-				FROM StasjonITabell NATURAL JOIN TogRuteTabell
-				WHERE RuteID = 1
-					AND tid > (SELECT tid FROM StasjonITabell WHERE Stasjonsnavn = "Trondheim")
-					AND tid < (SELECT tid FROM StasjonITabell WHERE Stasjonsnavn = "Mosjøen")
-				)
-	AND Stasjonsnavn <> "Trondheim"
-'''
-
-
-'''
-SELECT ForekomstID, RuteID, Dato, VognID, VognType, RadStørrelse, SitteplassID
-    FROM TogRuteForekomst
-        NATURAL JOIN Vognoppsett
-        NATURAL JOIN SattSammenAv
-        NATURAL JOIN Vogn
-        NATURAL JOIN Sitteplass
-    WHERE ForekomstID = 1
-        AND RuteID = 1
-        AND NOT EXISTS (SELECT SitteplassID 
-            FROM SitteplassPåBillett NATURAL JOIN Billett
-            WHERE SitteplassPåBillett.SitteplassID = Sitteplass.SitteplassID
-                AND Billett.StartStasjon <> (SELECT Stasjonsnavn
-                    FROM StasjonITabell NATURAL JOIN TogRuteTabell
-                    WHERE RuteID = 1
-                        AND tid > (SELECT tid FROM StasjonITabell WHERE Stasjonsnavn = "Trondheim")
-                        AND tid < (SELECT tid FROM StasjonITabell WHERE Stasjonsnavn = "Mosjøen")
-                    )
-                AND Billett.StartStasjon <> "Trondheim"
-                AND Billett.EndeStasjon <> (SELECT Stasjonsnavn
-                    FROM StasjonITabell NATURAL JOIN TogRuteTabell
-                    WHERE RuteID = 1
-                        AND tid > (SELECT tid FROM StasjonITabell WHERE Stasjonsnavn = "Trondheim")
-                        AND tid < (SELECT tid FROM StasjonITabell WHERE Stasjonsnavn = "Mosjøen")
-                    )
-                AND Billett.EndeStasjon <> "Mosjøen"
-        )
-'''
