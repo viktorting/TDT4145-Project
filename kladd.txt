@@ -42,3 +42,114 @@ WHERE ForekomstID = 1
 		FROM SitteplassPåBillett 
 		WHERE SitteplassPåBillett.SitteplassID = Sitteplass.SitteplassID
 	)
+
+
+
+
+
+
+	    '''
+    cursor.execute(f"""
+        SELECT ForekomstID, Dato, SitteplassID
+FROM TogRuteForekomst
+	NATURAL JOIN SattSammenAv
+	NATURAL JOIN Sitteplass
+WHERE ForekomstID = 1
+	AND ForekomstID = OppsettID
+
+EXCEPT
+
+SELECT ForekomstID, Dato, SitteplassID
+FROM TogRuteForekomst
+	NATURAL JOIN Vognoppsett
+	NATURAL JOIN SattSammenAv
+	NATURAL JOIN Vogn
+	NATURAL JOIN Sitteplass
+	NATURAL JOIN SitteplassPåBillett
+	NATURAL JOIN Billett
+WHERE ForekomstID = 1
+	AND RuteID = 1
+    AND EXISTS (SELECT SitteplassID 
+		FROM SitteplassPåBillett
+		WHERE SitteplassPåBillett.SitteplassID = Sitteplass.SitteplassID
+            AND Billett.StartStasjon <> {get_stations_between(start, stop, route)}
+            AND Billett.StartStasjon <> {start}
+            AND Billett.EndeStasjon <> {get_stations_between(start, stop, route)}
+            AND Billett.EndeStasjon <> {stop}
+	)
+    """)
+    
+    return cursor.fetchall()
+    '''
+
+# h) For en bruker skal man kunne finne all informasjon om de kjøpene hen har gjort for fremtidige reiser
+
+
+
+
+""" Henter opptatte plasser:
+SELECT Dato, RuteID, VognType, SitteplassID, BillettID, StartStasjon, EndeStasjon
+FROM TogRuteForekomst
+	NATURAL JOIN Vognoppsett
+	NATURAL JOIN SattSammenAv
+	NATURAL JOIN Vogn
+	NATURAL JOIN Sitteplass
+	NATURAL JOIN SitteplassPåBillett
+	NATURAL JOIN Billett
+WHERE ForekomstID = 1
+	AND RuteID = 1
+    AND EXISTS (SELECT SitteplassID 
+		FROM SitteplassPåBillett 
+		WHERE SitteplassPåBillett.SitteplassID = Sitteplass.SitteplassID
+	)
+"""
+
+""" Henter alle plasser til en TogRuteForekomst
+SELECT ForekomstID, Dato, SitteplassID
+FROM TogRuteForekomst
+	NATURAL JOIN SattSammenAv
+	NATURAL JOIN Sitteplass
+WHERE ForekomstID = 1
+	AND ForekomstID = OppsettID
+"""
+
+
+""" Henter alle LEDIGE plasser på en TogRuteForekomst
+SELECT ForekomstID, Dato, SitteplassID
+FROM TogRuteForekomst
+	NATURAL JOIN SattSammenAv
+	NATURAL JOIN Sitteplass
+WHERE ForekomstID = 1
+	AND ForekomstID = OppsettID
+    AND Billett.StartStasjon <> (SELECT Stasjonsnavn
+        FROM StasjonITabell NATURAL JOIN TogRuteTabell
+        WHERE RuteID = 1
+            AND tid > (SELECT tid FROM StasjonITabell WHERE Stasjonsnavn = "Trondheim")
+            AND tid < (SELECT tid FROM StasjonITabell WHERE Stasjonsnavn = "Mosjøen")
+    )
+    AND Billett.StartStasjon <> "Trondheim"
+    AND Billett.EndeStasjon <> (SELECT Stasjonsnavn
+        FROM StasjonITabell NATURAL JOIN TogRuteTabell
+        WHERE RuteID = 1
+            AND tid > (SELECT tid FROM StasjonITabell WHERE Stasjonsnavn = "Trondheim")
+            AND tid < (SELECT tid FROM StasjonITabell WHERE Stasjonsnavn = "Mosjøen")
+    )
+    AND Billett.EndeStasjon <> "Mosjøen"
+
+EXCEPT
+
+SELECT ForekomstID, Dato, SitteplassID
+FROM TogRuteForekomst
+	NATURAL JOIN Vognoppsett
+	NATURAL JOIN SattSammenAv
+	NATURAL JOIN Vogn
+	NATURAL JOIN Sitteplass
+	NATURAL JOIN SitteplassPåBillett
+	NATURAL JOIN Billett
+WHERE ForekomstID = 1
+	AND RuteID = 1
+    AND EXISTS (SELECT SitteplassID 
+		FROM SitteplassPåBillett
+		WHERE SitteplassPåBillett.SitteplassID = Sitteplass.SitteplassID
+	)
+"""

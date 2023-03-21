@@ -1,6 +1,7 @@
 import sqlite3
 import datetime
 import random
+from operator import sub
 
 # SQLite3 Dokumentasjon:
 # https://docs.python.org/3/library/sqlite3.html
@@ -82,16 +83,66 @@ def register_customer(email, firstname, lastname, phone):
 
 """
 g) Registrerte kunder skal kunne finne ledige billetter for en oppgitt strekning på en ønsket togrute
-og kjøpe de billettene hen ønsker. (Husk å kun slege ledige plasser)
+og kjøpe de billettene hen ønsker. (Husk å kun selge ledige plasser)
 """
 def get_stations_between(start, end, route):
-    return f"""
+    # fetch all station names between start and (including) end station:
+    cursor.execute(f"""
         SELECT Stasjonsnavn
         FROM StasjonITabell NATURAL JOIN TogRuteTabell
         WHERE RuteID = {route}
             AND tid > (SELECT tid FROM StasjonITabell WHERE Stasjonsnavn = "{start}")
-            AND tid < (SELECT tid FROM StasjonITabell WHERE Stasjonsnavn = "{end}")
-    """
+            AND tid <= (SELECT tid FROM StasjonITabell WHERE Stasjonsnavn = "{end}")
+    """)
+    return str(cursor.fetchall()).replace("('", '').replace("',)", '').replace('[', '').replace(']', '').split(', ')
+
+# as the name suggests:
+def get_all_availble_seats_between_stations(start, end, route):
+    taken_seats = []
+
+    # get all seats booked for every station up until the end station,
+    # or else we would only get seats taken between two said stations:
+    for station in get_stations_between(start, end, route):
+        cursor.execute(f'''
+        SELECT SitteplassID
+        FROM TogRuteForekomst
+	        NATURAL JOIN Vognoppsett
+	        NATURAL JOIN SattSammenAv
+            NATURAL JOIN Vogn
+	        NATURAL JOIN Sitteplass
+	        NATURAL JOIN SitteplassPåBillett
+	        NATURAL JOIN Billett
+        WHERE ForekomstID = {route}
+	        AND StartStasjon = "{start}"
+	        AND EndeStasjon = "{station}"
+            AND EXISTS (SELECT SitteplassID 
+		        FROM SitteplassPåBillett 
+		        WHERE SitteplassPåBillett.SitteplassID = Sitteplass.SitteplassID
+	    )''')
+        # add every purchased seat to taken_seats array for comparison: 
+        for seat in cursor.fetchall():
+            tmp = str(seat).replace('(', '').replace(',)', '')
+            if (tmp != "[]"):
+                taken_seats.append(str(tmp))
+
+    # fetch all available seats for a route:
+    cursor.execute(f'''
+        SELECT SitteplassID
+        FROM TogRuteForekomst
+	        NATURAL JOIN SattSammenAv
+	        NATURAL JOIN Sitteplass
+        WHERE ForekomstID = {route}
+	        AND ForekomstID = OppsettID
+        ''')
+    
+    # format return to str list to compare with taken seats:
+    available_seats = str(cursor.fetchall()).replace('(', '').replace(',)', '').replace('[', '').replace(']', '').split(', ')
+
+    # removes every item in taken_seats form available_seats:
+    return [i for i in available_seats if i not in taken_seats]
+
+
+
 
 def get_available_seats(start, stop, route):
 
@@ -122,112 +173,6 @@ def get_available_seats(start, stop, route):
         unavailable_trips.append(cursor.fetchall())
     
     print(unavailable_trips)
-
-    '''
-    cursor.execute(f"""
-        SELECT ForekomstID, Dato, SitteplassID
-FROM TogRuteForekomst
-	NATURAL JOIN SattSammenAv
-	NATURAL JOIN Sitteplass
-WHERE ForekomstID = 1
-	AND ForekomstID = OppsettID
-
-EXCEPT
-
-SELECT ForekomstID, Dato, SitteplassID
-FROM TogRuteForekomst
-	NATURAL JOIN Vognoppsett
-	NATURAL JOIN SattSammenAv
-	NATURAL JOIN Vogn
-	NATURAL JOIN Sitteplass
-	NATURAL JOIN SitteplassPåBillett
-	NATURAL JOIN Billett
-WHERE ForekomstID = 1
-	AND RuteID = 1
-    AND EXISTS (SELECT SitteplassID 
-		FROM SitteplassPåBillett
-		WHERE SitteplassPåBillett.SitteplassID = Sitteplass.SitteplassID
-            AND Billett.StartStasjon <> {get_stations_between(start, stop, route)}
-            AND Billett.StartStasjon <> {start}
-            AND Billett.EndeStasjon <> {get_stations_between(start, stop, route)}
-            AND Billett.EndeStasjon <> {stop}
-	)
-    """)
-    
-    return cursor.fetchall()
-    '''
-
-# h) For en bruker skal man kunne finne all informasjon om de kjøpene hen har gjort for fremtidige reiser
-
-
-
-
-""" Henter opptatte plasser:
-SELECT Dato, RuteID, VognType, SitteplassID, BillettID, StartStasjon, EndeStasjon
-FROM TogRuteForekomst
-	NATURAL JOIN Vognoppsett
-	NATURAL JOIN SattSammenAv
-	NATURAL JOIN Vogn
-	NATURAL JOIN Sitteplass
-	NATURAL JOIN SitteplassPåBillett
-	NATURAL JOIN Billett
-WHERE ForekomstID = 1
-	AND RuteID = 1
-    AND EXISTS (SELECT SitteplassID 
-		FROM SitteplassPåBillett 
-		WHERE SitteplassPåBillett.SitteplassID = Sitteplass.SitteplassID
-	)
-"""
-
-""" Henter alle plasser til en TogRuteForekomst
-SELECT ForekomstID, Dato, SitteplassID
-FROM TogRuteForekomst
-	NATURAL JOIN SattSammenAv
-	NATURAL JOIN Sitteplass
-WHERE ForekomstID = 1
-	AND ForekomstID = OppsettID
-"""
-
-
-""" Henter alle LEDIGE plasser på en TogRuteForekomst
-SELECT ForekomstID, Dato, SitteplassID
-FROM TogRuteForekomst
-	NATURAL JOIN SattSammenAv
-	NATURAL JOIN Sitteplass
-WHERE ForekomstID = 1
-	AND ForekomstID = OppsettID
-    AND Billett.StartStasjon <> (SELECT Stasjonsnavn
-        FROM StasjonITabell NATURAL JOIN TogRuteTabell
-        WHERE RuteID = 1
-            AND tid > (SELECT tid FROM StasjonITabell WHERE Stasjonsnavn = "Trondheim")
-            AND tid < (SELECT tid FROM StasjonITabell WHERE Stasjonsnavn = "Mosjøen")
-    )
-    AND Billett.StartStasjon <> "Trondheim"
-    AND Billett.EndeStasjon <> (SELECT Stasjonsnavn
-        FROM StasjonITabell NATURAL JOIN TogRuteTabell
-        WHERE RuteID = 1
-            AND tid > (SELECT tid FROM StasjonITabell WHERE Stasjonsnavn = "Trondheim")
-            AND tid < (SELECT tid FROM StasjonITabell WHERE Stasjonsnavn = "Mosjøen")
-    )
-    AND Billett.EndeStasjon <> "Mosjøen"
-
-EXCEPT
-
-SELECT ForekomstID, Dato, SitteplassID
-FROM TogRuteForekomst
-	NATURAL JOIN Vognoppsett
-	NATURAL JOIN SattSammenAv
-	NATURAL JOIN Vogn
-	NATURAL JOIN Sitteplass
-	NATURAL JOIN SitteplassPåBillett
-	NATURAL JOIN Billett
-WHERE ForekomstID = 1
-	AND RuteID = 1
-    AND EXISTS (SELECT SitteplassID 
-		FROM SitteplassPåBillett
-		WHERE SitteplassPåBillett.SitteplassID = Sitteplass.SitteplassID
-	)
-"""
 
 
 def get_customer(id): 
@@ -261,7 +206,8 @@ while(action := input('''Actions:
     
     Select action: ''')):
     if (action == "Test"):
-        test()
+        print(get_all_availble_seats_between_stations('Trondheim', 'Mosjøen', 1))
+        break
     
     if (action == 'Fetch'):
         print(str(get_all_routes(input('Station: '), 
@@ -279,9 +225,9 @@ while(action := input('''Actions:
                           input('Phone: '))
         
     if (action == "Available"):
-        get_available_seats(input('Start Station: '), 
+        print(get_all_availble_seats_between_stations(input('Start Station: '), 
                           input('End Station: '), 
-                          input('Route: '))
+                          input('Route: ')))
     
 
 print('Closing database...')
